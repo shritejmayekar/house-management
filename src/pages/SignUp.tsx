@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import VisibilityIcon from '../assets/svg/visibilityIcon.svg';
 import ArrowRightIcon from '../assets/svg/keyboardArrowRightIcon.svg';
+import { createUserWithEmailAndPassword,getAuth, updateProfile } from 'firebase/auth';
+import app from '../firebase.config';
 function SignUp() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [formData, setFormData] = useState({
@@ -19,17 +21,40 @@ function SignUp() {
     }));
   };
 
+  const onSubmit = (e:any) => {
+    e.preventDefault()
+    try {
+      const auth = getAuth(app);
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // Signed up 
+          const user = userCredential.user;
+          console.log(user)
+          navigate('/')
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log(errorCode,errorMessage)
+          // ..
+        });
+    } catch (error) {
+      alert(error)
+    }
+   
+    
+  }
   return (
     <>
       <div className="pageContainer">
         <header>
           <p className="pageHeader">Welcome Back!</p>
         </header>
-        <form>
+        <form onSubmit={onSubmit}>
         <input
             type="text"
             className="nameInput"
-            placeholder="Email"
+            placeholder="Name"
             id="name"
             value={name}
             onChange={onChange}
@@ -61,7 +86,7 @@ function SignUp() {
          
           <div className="signUpBar">
             <p className="signUpText">Sign Up</p>
-            <button className="signUpButton">
+            <button   type="submit" className="signUpButton">
               <img
                 src={ArrowRightIcon}
                 className="btn-white"
@@ -71,10 +96,10 @@ function SignUp() {
             </button>
           </div>
         </form>
-
-        <Link to="/sign-in" className="registerLink">
+        <Link to="/sign-in" className="mt-0 registerLink">
           Sign In Instead
         </Link>
+
       </div>
     </>
   );
